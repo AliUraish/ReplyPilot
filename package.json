@@ -1,0 +1,13 @@
+{
+  "name": "vercel-hackathon-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Serverless API + cron for mentions drafting and approvals",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}
+
