@@ -1,0 +1,32 @@
+name: scan-and-draft
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # UTC schedule
+  workflow_dispatch:
+
+concurrency:
+  group: scan-and-draft
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger backend scan
+        env:
+          # Set this repository variable or hardcode your backend URL
+          BACKEND_URL: ${{ vars.BACKEND_URL }}
+          CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BACKEND_URL:-}" ]; then
+            echo "BACKEND_URL repo var not set. Define it in GitHub → Settings → Secrets and variables → Actions → Variables" >&2
+            exit 1
+          fi
+          curl -fsS -X POST "$BACKEND_URL/api/scan-and-draft" \
+            -H "Authorization: Bearer $CRON_TOKEN" \
+            -H "Content-Type: application/json" \
+            --retry 3 --retry-delay 5
+
