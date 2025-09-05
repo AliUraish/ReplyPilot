@@ -1,9 +1,9 @@
-const { supabase } = require('../../backend/lib/db');
-const { requireCron } = require('../../backend/lib/auth');
-const { getMentions } = require('../../backend/lib/x');
-const { generateDraft } = require('../../backend/lib/ai');
-const { appendEvent } = require('../../backend/lib/events');
-const { applyCors } = require('../../backend/lib/cors');
+const { supabase } = require('../../../backend/lib/db');
+const { requireCron } = require('../../../backend/lib/auth');
+const { getMentions } = require('../../../backend/lib/x');
+const { generateDraft } = require('../../../backend/lib/ai');
+const { appendEvent } = require('../../../backend/lib/events');
+const { applyCors } = require('../../../backend/lib/cors');
 
 module.exports = async (req, res) => {
   try {
