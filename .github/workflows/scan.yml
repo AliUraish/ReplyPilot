@@ -16,17 +16,16 @@ jobs:
     steps:
       - name: Trigger backend scan
         env:
-          # Set this repository variable or hardcode your backend URL
-          BACKEND_URL: ${{ vars.BACKEND_URL }}
+          # Prefer secret, fallback to repo variable
+          BACKEND_URL: ${{ secrets.BACKEND_URL || vars.BACKEND_URL }}
           CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
         run: |
           set -euo pipefail
           if [ -z "${BACKEND_URL:-}" ]; then
-            echo "BACKEND_URL repo var not set. Define it in GitHub → Settings → Secrets and variables → Actions → Variables" >&2
+            echo "BACKEND_URL not set. Define it as an Actions Secret (recommended) or Variable in GitHub → Settings → Secrets and variables → Actions." >&2
             exit 1
           fi
           curl -fsS -X POST "$BACKEND_URL/api/scan-and-draft" \
             -H "Authorization: Bearer $CRON_TOKEN" \
             -H "Content-Type: application/json" \
             --retry 3 --retry-delay 5
-

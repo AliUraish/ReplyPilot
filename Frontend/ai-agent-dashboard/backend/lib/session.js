@@ -75,3 +75,4 @@ function clearSession(res) {
 }
 
 module.exports = { getSessionUserId, setSessionUserId, clearSession };
+
