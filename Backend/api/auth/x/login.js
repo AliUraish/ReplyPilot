@@ -1,5 +1,6 @@
 const { supabase } = require('../../../../lib/db');
-const { getSessionUserId } = require('../../../../lib/auth');
+const { ensureUserSession } = require('../../../../lib/auth');
+const { applyCors } = require('../../../../lib/cors');
 const crypto = require('crypto');
 
 function base64url(input) {
@@ -16,7 +17,8 @@ function sha256Base64Url(str) {
 
 module.exports = async (req, res) => {
   try {
-    const userId = getSessionUserId(req);
+    if (applyCors(req, res)) return;
+    const userId = await ensureUserSession(req, res);
     const clientId = process.env.X_CLIENT_ID;
     const redirectUri = process.env.X_REDIRECT_URI;
     const scopes = (process.env.X_SCOPES || 'tweet.read tweet.write users.read offline.access').split(/\s+/).join(' ');
@@ -49,4 +51,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
