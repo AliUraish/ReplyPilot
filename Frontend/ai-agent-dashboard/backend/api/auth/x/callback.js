@@ -52,12 +52,10 @@ module.exports = async (req, res) => {
     const handle = me.username;
     const name = me.name;
 
-    // Ensure app user exists
     if (st.user_id) {
       await supabase.from('app_user').upsert({ id: st.user_id }).select('id').maybeSingle();
     }
 
-    // Upsert account
     const { data: acc } = await supabase
       .from('account')
       .upsert({ user_id: st.user_id, x_user_id: xUserId, handle, name }, { onConflict: 'x_user_id' })
@@ -66,7 +64,6 @@ module.exports = async (req, res) => {
 
     const accountId = acc?.id;
 
-    // Upsert tokens
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
     await supabase.from('x_tokens').upsert({
       account_id: accountId,
@@ -77,11 +74,8 @@ module.exports = async (req, res) => {
       revoked: false,
     }, { onConflict: 'account_id' });
 
-    // Ensure settings/state exist
     await supabase.from('settings').upsert({ account_id: accountId });
     await supabase.from('mention_state').upsert({ account_id: accountId });
-
-    // Cleanup state
     await supabase.from('oauth_state').delete().eq('state', String(state));
 
     res.statusCode = 200;
@@ -91,3 +85,4 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
+

@@ -1,7 +1,7 @@
-const { supabase } = require('../../lib/db');
-const { getSessionUserId } = require('../../lib/auth');
-const { appendEvent } = require('../../lib/events');
-const { applyCors } = require('../../lib/cors');
+const { supabase } = require('../lib/db');
+const { getSessionUserId } = require('../lib/auth');
+const { appendEvent } = require('../lib/events');
+const { applyCors } = require('../lib/cors');
 
 module.exports = async (req, res) => {
   try {
@@ -30,3 +30,4 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
+

@@ -17,7 +17,6 @@ module.exports = async (req, res) => {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
-      // CORS headers already set by applyCors
     });
 
     const lastEventId = req.headers['last-event-id'] ? Number(req.headers['last-event-id']) : null;
@@ -37,7 +36,6 @@ module.exports = async (req, res) => {
     let active = true;
     req.on('close', () => { active = false; });
 
-    // initial backlog
     const { data: back } = await supabase
       .from('event_log')
       .select('*')
@@ -47,7 +45,6 @@ module.exports = async (req, res) => {
       .limit(100);
     for (const ev of back || []) { send(ev); cursor = ev.id; }
 
-    // polling loop
     while (active) {
       const { data: events } = await supabase
         .from('event_log')

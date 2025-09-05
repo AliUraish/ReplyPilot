@@ -12,10 +12,8 @@ function requireCron(req) {
 }
 
 async function getSessionUserId(req) {
-  // Prefer cookie/JWT session if available
   const uid = getUidFromCookie(req);
   if (uid) return String(uid);
-  // Fallback to header for development/testing
   const header = req.headers['x-user-id'];
   if (header) return String(header);
   const e = new Error('Unauthenticated');
@@ -23,11 +21,9 @@ async function getSessionUserId(req) {
   throw e;
 }
 
-// Ensure a session user exists; if none, create an app_user row and set cookie
 async function ensureUserSession(req, res) {
   let uid = getUidFromCookie(req);
   if (uid) return uid;
-  // create new app user row
   const { data, error } = await supabase.from('app_user').insert({}).select('id').maybeSingle();
   if (error) {
     const e = new Error('Failed to create user');
@@ -44,3 +40,4 @@ module.exports = {
   getSessionUserId,
   ensureUserSession,
 };
+
