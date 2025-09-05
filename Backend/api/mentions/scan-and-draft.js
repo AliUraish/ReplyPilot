@@ -3,9 +3,11 @@ const { requireCron } = require('../../lib/auth');
 const { getMentions } = require('../../lib/x');
 const { generateDraft } = require('../../lib/ai');
 const { appendEvent } = require('../../lib/events');
+const { applyCors } = require('../../lib/cors');
 
 module.exports = async (req, res) => {
   try {
+    if (applyCors(req, res)) return;
     requireCron(req);
 
     const { data: accounts, error: accErr } = await supabase
@@ -118,4 +120,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
