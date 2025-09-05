@@ -1,2 +1,1 @@
-module.exports = require('../../Backend/api/settings/get.js');
-
+module.exports = require('../../Backend/settings/get.js');
