@@ -1,5 +1,5 @@
-const { supabase } = require('../../../../lib/db');
-const { applyCors } = require('../../../../lib/cors');
+const { supabase } = require('../../../lib/db');
+const { applyCors } = require('../../../lib/cors');
 
 async function exchangeToken({ clientId, clientSecret, code, redirectUri, codeVerifier }) {
   const body = new URLSearchParams();
@@ -85,4 +85,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
