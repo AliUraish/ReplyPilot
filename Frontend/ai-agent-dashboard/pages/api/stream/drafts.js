@@ -1,2 +1,1 @@
-module.exports = require('../../../backend/api/stream/drafts.js');
-
+module.exports = require('../../backend/api/stream/drafts.js');
