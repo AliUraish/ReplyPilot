@@ -1,2 +1,1 @@
-module.exports = require('../../../backend/api/mentions/scan-and-draft.js');
-
+module.exports = require('../../backend/api/mentions/scan-and-draft.js');
