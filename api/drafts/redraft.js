@@ -1,2 +1,1 @@
-module.exports = require('../../Backend/api/drafts/redraft.js');
-
+module.exports = require('../../Backend/drafts/redraft.js');
