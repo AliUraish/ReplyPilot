@@ -1,9 +1,11 @@
 const { supabase } = require('../../lib/db');
 const { getSessionUserId } = require('../../lib/auth');
+const { applyCors } = require('../../lib/cors');
 
 module.exports = async (req, res) => {
   try {
-    const userId = getSessionUserId(req);
+    if (applyCors(req, res)) return;
+    const userId = await getSessionUserId(req);
     const { status = 'pending', limit = '20', order = 'recent', accountId } = req.query || {};
 
     let accountQuery = supabase.from('account').select('id').eq('user_id', userId);
@@ -26,4 +28,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
