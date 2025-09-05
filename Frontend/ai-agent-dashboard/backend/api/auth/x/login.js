@@ -1,6 +1,6 @@
-const { supabase } = require('../../../../lib/db');
-const { ensureUserSession } = require('../../../../lib/auth');
-const { applyCors } = require('../../../../lib/cors');
+const { supabase } = require('../../../lib/db');
+const { ensureUserSession } = require('../../../lib/auth');
+const { applyCors } = require('../../../lib/cors');
 const crypto = require('crypto');
 
 function base64url(input) {
@@ -51,4 +51,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
