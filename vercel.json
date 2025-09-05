@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/scan-and-draft",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
