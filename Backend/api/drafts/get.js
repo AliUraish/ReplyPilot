@@ -1,9 +1,11 @@
 const { supabase } = require('../../lib/db');
 const { getSessionUserId } = require('../../lib/auth');
+const { applyCors } = require('../../lib/cors');
 
 module.exports = async (req, res) => {
   try {
-    const userId = getSessionUserId(req);
+    if (applyCors(req, res)) return;
+    const userId = await getSessionUserId(req);
     const { id } = req.query || {};
     if (!id) {
       res.statusCode = 400;
@@ -24,4 +26,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
