@@ -2,10 +2,12 @@ const { supabase } = require('../../lib/db');
 const { getSessionUserId } = require('../../lib/auth');
 const { postReply } = require('../../lib/x');
 const { appendEvent } = require('../../lib/events');
+const { applyCors } = require('../../lib/cors');
 
 module.exports = async (req, res) => {
   try {
-    const userId = getSessionUserId(req);
+    if (applyCors(req, res)) return;
+    const userId = await getSessionUserId(req);
     const { id } = req.query || {};
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     if (!id) return res.status(400).json({ ok: false, error: 'Missing id' });
@@ -37,4 +39,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
