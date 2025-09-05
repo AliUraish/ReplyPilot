@@ -1,9 +1,11 @@
 const { supabase } = require('../../lib/db');
 const { getSessionUserId } = require('../../lib/auth');
+const { applyCors } = require('../../lib/cors');
 
 module.exports = async (req, res) => {
   try {
-    const userId = getSessionUserId(req);
+    if (applyCors(req, res)) return;
+    const userId = await getSessionUserId(req);
     const { accountId } = req.query || {};
     if (!accountId) return res.status(400).json({ ok: false, error: 'Missing accountId' });
     const { data: acc } = await supabase.from('account').select('id, user_id').eq('id', accountId).maybeSingle();
@@ -15,4 +17,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) });
   }
 };
-
