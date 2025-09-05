@@ -1,6 +1,6 @@
-const { supabase } = require('../../backend/lib/db');
-const { getSessionUserId } = require('../../backend/lib/auth');
-const { applyCors } = require('../../backend/lib/cors');
+const { supabase } = require('../../../backend/lib/db');
+const { getSessionUserId } = require('../../../backend/lib/auth');
+const { applyCors } = require('../../../backend/lib/cors');
 
 module.exports = async (req, res) => {
   try {
