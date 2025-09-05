@@ -1,2 +1,1 @@
-module.exports = require('../../Backend/api/settings/update.js');
-
+module.exports = require('../../Backend/settings/update.js');
