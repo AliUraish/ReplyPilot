@@ -1,4 +1,5 @@
 const { supabase } = require('../../../../lib/db');
+const { applyCors } = require('../../../../lib/cors');
 
 async function exchangeToken({ clientId, clientSecret, code, redirectUri, codeVerifier }) {
   const body = new URLSearchParams();
@@ -28,6 +29,7 @@ async function getMe(accessToken) {
 
 module.exports = async (req, res) => {
   try {
+    if (applyCors(req, res)) return;
     const { state, code } = req.query || {};
     if (!state || !code) return res.status(400).json({ ok: false, error: 'Missing state or code' });
 
