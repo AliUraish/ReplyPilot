@@ -1,0 +1,49 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node
+node_modules/
+.npm/
+
+# Vercel
+.vercel/
+
+# Next.js
+.next/
+.next.cache/
+out/
+
+# Build outputs
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Caches
+.cache/
+.eslintcache
+turbo/
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Supabase (local CLI artifacts)
+.supabase/
+supabase/.temp/
+
