@@ -5,7 +5,7 @@ const { generateDraft } = require('../../backend/lib/ai');
 const { appendEvent } = require('../../backend/lib/events');
 const { applyCors } = require('../../backend/lib/cors');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     if (applyCors(req, res)) return;
     requireCron(req);
@@ -119,4 +119,4 @@ module.exports = async (req, res) => {
     res.statusCode = e.statusCode || 500;
     res.json({ ok: false, error: String(e.message || e) });
   }
-};
+}
