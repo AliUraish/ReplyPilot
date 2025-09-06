@@ -26,12 +26,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem("user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    let cancelled = false
+    async function bootstrap() {
+      try {
+        // Prefer server session if present
+        const res = await fetch("/api/auth/me", { credentials: "include" })
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled && data?.user?.id) {
+            setUser(data.user)
+            localStorage.setItem("user", JSON.stringify(data.user))
+            setIsLoading(false)
+            return
+          }
+        }
+      } catch {}
+      // Fallback to localStorage (demo mode)
+      const savedUser = localStorage.getItem("user")
+      if (!cancelled && savedUser) {
+        setUser(JSON.parse(savedUser))
+      }
+      if (!cancelled) setIsLoading(false)
     }
-    setIsLoading(false)
+    bootstrap()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const signIn = async (provider: string) => {
