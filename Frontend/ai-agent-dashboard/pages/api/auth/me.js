@@ -1,7 +1,7 @@
 const { supabase } = require("../../../backend/lib/db")
 const { getSessionUserId } = require("../../../backend/lib/auth")
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     const uid = await getSessionUserId(req)
 
@@ -33,4 +33,3 @@ module.exports = async (req, res) => {
     res.json({ ok: false, error: String(e.message || e) })
   }
 }
-
