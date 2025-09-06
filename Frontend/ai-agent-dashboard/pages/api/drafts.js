@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     const { action } = req.query || {};
     const method = req.method || 'GET';
@@ -22,5 +22,4 @@ module.exports = async (req, res) => {
     res.statusCode = 500;
     res.json({ ok: false, error: String(e.message || e) });
   }
-};
-
+}
