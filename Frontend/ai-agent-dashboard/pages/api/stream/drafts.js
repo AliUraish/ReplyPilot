@@ -68,4 +68,4 @@ export default async function handler(req, res) {
       try { res.end(); } catch {}
     }
   }
-};
+}
