@@ -1,2 +1,5 @@
-module.exports = require('../../../../backend/api/auth/x/callback.js');
+const handler = require('../../../../backend/api/auth/x/callback.js');
 
+export default function callback(req, res) {
+  return handler(req, res);
+}
