@@ -11,10 +11,14 @@ export function AuthForm() {
   const { signIn } = useAuth()
 
   const handleSocialLogin = async (provider: string) => {
+    if (provider.toLowerCase() === "twitter") {
+      // Real OAuth with X/Twitter via Next API route
+      window.location.href = "/api/auth/x/login"
+      return
+    }
     setIsLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 800))
       await signIn(provider)
     } catch (error) {
       console.error("Login failed:", error)
