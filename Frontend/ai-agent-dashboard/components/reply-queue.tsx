@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Icons } from "@/components/icons"
-import { useSocialPosting } from "@/hooks/use-social-posting"
+import { listDrafts, approveDraft, rejectDraft, redraft, type DraftItem } from "@/lib/api"
+import { useAuth } from "@/hooks/use-auth"
 
 interface Reply {
   id: string
@@ -21,32 +22,38 @@ interface Reply {
 }
 
 export function ReplyQueue() {
-  const [replies, setReplies] = useState<Reply[]>([
-    {
-      id: "1",
-      originalMention: "Just tried the new AI feature and it's amazing! How does it work so well?",
-      generatedReply:
-        "Thank you for the kind words! Our AI uses advanced machine learning algorithms trained on millions of conversations to understand context and generate helpful responses. We're constantly improving it based on user feedback. Is there anything specific you'd like to know more about?",
-      platform: "twitter",
-      status: "pending",
-      timestamp: "2 minutes ago",
-    },
-    {
-      id: "2",
-      originalMention: "Looking for alternatives to current AI tools. Any recommendations?",
-      generatedReply:
-        "Hi Mike! We'd love to show you what makes our AI platform different. We focus on accuracy, ease of use, and seamless integration. Would you be interested in a quick demo to see how it could fit your workflow?",
-      platform: "linkedin",
-      status: "pending",
-      timestamp: "15 minutes ago",
-    },
-  ])
+  const { user } = useAuth()
+  const userId = user?.id
+
+  const [replies, setReplies] = useState<Reply[]>([])
+  const [loading, setLoading] = useState(true)
 
   const [rephraseDialogOpen, setRephraseDialogOpen] = useState<string | null>(null)
   const [rephraseInstructions, setRephraseInstructions] = useState("")
   const [isRephrasing, setIsRephrasing] = useState(false)
 
-  const { postReply, isPosting } = useSocialPosting()
+  const anyPosting = useMemo(() => replies.some((r) => r.status === "posting"), [replies])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      try {
+        const items = await listDrafts({ status: "pending", order: "recent", limit: 50 }, userId)
+        if (cancelled) return
+        setReplies(items.map(mapDraftToReply))
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load drafts:", e)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
 
   const handleApprove = async (id: string) => {
     const reply = replies.find((r) => r.id === id)
@@ -55,22 +62,25 @@ export function ReplyQueue() {
     setReplies(replies.map((r) => (r.id === id ? { ...r, status: "posting" as const } : r)))
 
     try {
-      const result = await postReply(reply.platform, reply.generatedReply, id)
-
-      if (result.success) {
-        setReplies(replies.map((r) => (r.id === id ? { ...r, status: "posted" as const } : r)))
-      } else {
-        setReplies(replies.map((r) => (r.id === id ? { ...r, status: "failed" as const, error: result.error } : r)))
-      }
+      await approveDraft(id, userId, reply.generatedReply)
+      setReplies(replies.map((r) => (r.id === id ? { ...r, status: "posted" as const, error: undefined } : r)))
     } catch (error) {
       setReplies(
-        replies.map((r) => (r.id === id ? { ...r, status: "failed" as const, error: "Failed to post reply" } : r)),
+        replies.map((r) => (r.id === id ? { ...r, status: "failed" as const, error: (error as Error)?.message || "Failed to post reply" } : r)),
       )
     }
   }
 
   const handleReject = (id: string) => {
-    setReplies(replies.map((reply) => (reply.id === id ? { ...reply, status: "rejected" as const } : reply)))
+    ;(async () => {
+      try {
+        await rejectDraft(id, userId)
+        setReplies(replies.map((reply) => (reply.id === id ? { ...reply, status: "rejected" as const } : reply)))
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Reject failed:", e)
+      }
+    })()
   }
 
   const handleEdit = (id: string, newReply: string) => {
@@ -88,33 +98,22 @@ export function ReplyQueue() {
 
     setIsRephrasing(true)
 
-    // Simulate AI rephrasing with instructions
-    setTimeout(() => {
+    try {
+      const res = await redraft(id, rephraseInstructions, userId)
+      const suggested = (res as any)?.suggested_reply || ""
       const reply = replies.find((r) => r.id === id)
       if (reply) {
-        // Simple simulation of rephrasing based on instructions
-        let newReply = reply.generatedReply
-
-        if (rephraseInstructions.toLowerCase().includes("shorter")) {
-          newReply = reply.generatedReply.split(".")[0] + "."
-        } else if (rephraseInstructions.toLowerCase().includes("longer")) {
-          newReply = reply.generatedReply + " Let me know if you have any other questions!"
-        } else if (rephraseInstructions.toLowerCase().includes("formal")) {
-          newReply = reply.generatedReply.replace(/Hi|Hey/g, "Dear").replace(/!/g, ".")
-        } else if (rephraseInstructions.toLowerCase().includes("casual")) {
-          newReply = reply.generatedReply.replace(/Dear/g, "Hey").replace(/\./g, "!")
-        } else {
-          // Generic rephrase
-          newReply = `Based on your request: ${rephraseInstructions}. ` + reply.generatedReply
-        }
-
+        const newReply = suggested || reply.generatedReply
         setReplies(replies.map((r) => (r.id === id ? { ...r, generatedReply: newReply } : r)))
       }
-
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Redraft failed:", e)
+    } finally {
       setIsRephrasing(false)
       setRephraseDialogOpen(null)
       setRephraseInstructions("")
-    }, 1500)
+    }
   }
 
   const getPlatformIcon = (platform: string) => {
@@ -144,10 +143,13 @@ export function ReplyQueue() {
         <CardTitle className="flex items-center gap-2">
           <Icons.clock className="h-5 w-5" />
           Reply Queue
-          {isPosting && <Icons.bot className="h-4 w-4 animate-spin text-blue-600" />}
+          {anyPosting && <Icons.bot className="h-4 w-4 animate-spin text-blue-600" />}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {loading && (
+          <div className="text-sm text-muted-foreground">Loading drafts…</div>
+        )}
         {replies.map((reply) => {
           const PlatformIcon = getPlatformIcon(reply.platform)
           return (
@@ -292,4 +294,16 @@ export function ReplyQueue() {
       </CardContent>
     </Card>
   )
+}
+
+function mapDraftToReply(d: DraftItem): Reply {
+  return {
+    id: String(d.id),
+    originalMention: d.tweet_text || "",
+    generatedReply: d.suggested_reply || "",
+    platform: "twitter",
+    status: (d.status as Reply["status"]) || "pending",
+    timestamp: d.created_at ? new Date(d.created_at).toLocaleString() : new Date().toLocaleString(),
+    error: d.error || undefined,
+  }
 }
