@@ -2,7 +2,7 @@ const { supabase } = require('../../../backend/lib/db');
 const { getSessionUserId } = require('../../../backend/lib/auth');
 const { applyCors } = require('../../../backend/lib/cors');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     if (applyCors(req, res)) return;
     const userId = await getSessionUserId(req);
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
       res.write(`id: ${event.id}\n`);
       res.write(`event: ${event.type}\n`);
       res.write(`data: ${JSON.stringify(event.payload)}\n\n`);
-    };
+}
 
     const sendHeartbeat = () => {
       res.write(`event: heartbeat\n`);

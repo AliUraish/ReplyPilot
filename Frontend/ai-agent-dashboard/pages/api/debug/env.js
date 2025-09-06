@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     const safe = (v) => (v && String(v).length > 0 ? true : false)
     const isProd = process.env.NODE_ENV === "production"
@@ -24,4 +24,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ ok: false, error: String(e.message || e) })
   }
 }
-
