@@ -78,8 +78,10 @@ module.exports = async (req, res) => {
     await supabase.from('mention_state').upsert({ account_id: accountId });
     await supabase.from('oauth_state').delete().eq('state', String(state));
 
-    res.statusCode = 200;
-    res.json({ ok: true, account_id: accountId, handle, name });
+    // Redirect to dashboard on success for browser UX
+    res.statusCode = 302;
+    res.setHeader('Location', '/dashboard');
+    res.end();
   } catch (e) {
     res.statusCode = 500;
     res.json({ ok: false, error: String(e.message || e) });
