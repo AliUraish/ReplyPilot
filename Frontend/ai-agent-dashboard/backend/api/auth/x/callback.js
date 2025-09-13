@@ -14,14 +14,14 @@ async function exchangeToken({ clientId, clientSecret, code, redirectUri, codeVe
     const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     headers['Authorization'] = `Basic ${basic}`;
   }
-  const res = await fetch('https://api.twitter.com/2/oauth2/token', { method: 'POST', headers, body });
+  const res = await fetch('https://api.x.com/2/oauth2/token', { method: 'POST', headers, body });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`token exchange ${res.status}: ${JSON.stringify(json)}`);
   return json;
 }
 
 async function getMe(accessToken) {
-  const res = await fetch('https://api.twitter.com/2/users/me', { headers: { Authorization: `Bearer ${accessToken}` } });
+  const res = await fetch('https://api.x.com/2/users/me', { headers: { Authorization: `Bearer ${accessToken}` } });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`users/me ${res.status}: ${JSON.stringify(json)}`);
   return json.data;
